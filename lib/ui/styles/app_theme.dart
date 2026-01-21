@@ -107,6 +107,8 @@ class AppTheme {
       margin: const EdgeInsets.symmetric(vertical: 8),
     ),
 
+    iconTheme: const IconThemeData(color: textMain),
+
     // ... (rest of light theme inputs/buttons same as before) ...
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

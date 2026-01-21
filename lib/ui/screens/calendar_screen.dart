@@ -45,14 +45,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
+                  color: theme.iconTheme.color ?? AppTheme.textMain,
                   onPressed: () => setState(() {
                     _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
                   }),
                 ),
+                const SizedBox(width: 16),
                 Text(
                   DateFormat('MMMM yyyy', 'fr_FR').format(_focusedDay).toUpperCase(),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -60,8 +62,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     color: AppTheme.primaryBrand,
                   ),
                 ),
+                const SizedBox(width: 16),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
+                  color: theme.iconTheme.color ?? AppTheme.textMain,
                   onPressed: () => setState(() {
                     _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
                   }),
