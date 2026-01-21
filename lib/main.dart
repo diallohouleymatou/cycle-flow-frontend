@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'logic/auth_provider.dart';
 import 'logic/cycle_provider.dart';
-import 'ui/screens/login_screen.dart';
-import 'ui/screens/home_screen.dart';
+import 'logic/theme_provider.dart';
+import 'logic/journal_provider.dart';
+import 'logic/router.dart';
+import 'ui/styles/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,31 +24,58 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProxyProvider<AuthProvider, CycleProvider>(
-          create: (context) => CycleProvider(context.read<AuthProvider>().api),
-          update: (context, auth, previous) => CycleProvider(auth.api),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => JournalProvider()),
+        ChangeNotifierProxyProvider2<AuthProvider, JournalProvider, CycleProvider>(
+          create: (context) => CycleProvider(
+            context.read<AuthProvider>().api,
+            context.read<JournalProvider>(),
+          ),
+          update: (context, auth, journal, previous) => CycleProvider(auth.api, journal),
         ),
       ],
-      child: MaterialApp(
-        title: 'CycleFlow',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFF06292), // Rose/Pink for the theme
-            brightness: Brightness.light,
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFFF06292),
-            foregroundColor: Colors.white,
-          ),
-        ),
-        home: Consumer<AuthProvider>(
-          builder: (context, auth, _) {
-            return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
-          },
-        ),
-      ),
+      child: const CycleFlowApp(),
+    );
+  }
+}
+
+class CycleFlowApp extends StatefulWidget {
+  const CycleFlowApp({super.key});
+
+  @override
+  State<CycleFlowApp> createState() => _CycleFlowAppState();
+}
+
+class _CycleFlowAppState extends State<CycleFlowApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    final authProvider = context.read<AuthProvider>();
+    _router = createRouter(authProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
+    return MaterialApp.router(
+      title: 'CycleFlow',
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en', 'US'),
+      ],
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
+      routerConfig: _router,
     );
   }
 }
